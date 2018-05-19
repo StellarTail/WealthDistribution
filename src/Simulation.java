@@ -1,7 +1,18 @@
+
+/**
+ * Feng Zhao, 903591
+ * Mingyang Zhang, 650242
+ */
 import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Simulation class
+ *
+ * @author Feng Zhao
+ * @date 18/05/2018
+ */
 public class Simulation {
 
 	private Board board;
@@ -20,7 +31,7 @@ public class Simulation {
     		int maxLife, 
     		double percentBestLand,
 			int growthInterval,
-			int grainGrow,
+			int grainGrow, 
 			int ticks) {
     	originModel(numPeople, maxVision , maxMetabolism, minLife, maxLife, percentBestLand, growthInterval, grainGrow, ticks);
     	modelWithTax(numPeople, maxVision , maxMetabolism, minLife, maxLife, percentBestLand, growthInterval, grainGrow, ticks);

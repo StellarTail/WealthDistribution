@@ -1,3 +1,8 @@
+
+/**
+ * Feng Zhao, 903591
+ * Mingyang Zhang, 650242
+ */
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;

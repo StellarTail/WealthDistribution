@@ -1,5 +1,16 @@
+
+/**
+ * Feng Zhao, 903591
+ * Mingyang Zhang, 650242
+ */
 import java.util.Random;
 
+/**
+ * Turtle class
+ *
+ * @author Feng Zhao
+ * @date 13/05/2018
+ */
 public class Turtle {
 	
 	private Random random = new Random();

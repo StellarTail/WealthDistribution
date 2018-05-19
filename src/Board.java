@@ -1,7 +1,18 @@
+
+/**
+ * Feng Zhao, 903591
+ * Mingyang Zhang, 650242
+ */
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Random;
 
+/**
+ * Board class
+ *
+ * @author Feng Zhao
+ * @date 13/05/2018
+ */
 public class Board {
 
 	// All parameters can be settled by user in the board

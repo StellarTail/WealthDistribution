@@ -1,5 +1,11 @@
 import java.util.Random;
 
+/**
+ * Patch class
+ *
+ * @author Feng Zhao
+ * @date 13/05/2018
+ */
 public class Patch {
 
 	private int grain;
