@@ -1,3 +1,5 @@
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Random;
 
 public class Board {
@@ -27,13 +29,15 @@ public class Board {
 	private int tick_count = 0;
 	
 	// Parameters will be printed
-	private int lower_avg;
-	private int medium_avg;
-	private int higher_avg;
+	private double lower_avg;
+	private double medium_avg;
+	private double higher_avg;
 	private int lower_num;
 	private int medium_num;
 	private int higher_num;
-	private int gini_index;
+	private double gini_index;
+	private int adjust_highest_wealth;
+	private int adjust_lowest_wealth;
 	
 	// Extension implements switches
 	private boolean tax = false;
@@ -49,7 +53,10 @@ public class Board {
 			int maxLife, 
 			double percentBestLand,
 			int growthInterval,
-			int grainGrow){
+			int grainGrow,
+			boolean tax,
+			boolean inheritance,
+			boolean guidance){
 		width = 50;
 		height = 50;
 		patches = new Patch[height][width];
@@ -62,6 +69,9 @@ public class Board {
 		this.percentBestLand = percentBestLand;
 		this.growthInterval = growthInterval;
 		this.grainGrow = grainGrow;
+		this.tax = tax;
+		this.inheritance = inheritance;
+		this.guidance = guidance;
 	}
 	
 	/** 
@@ -70,23 +80,18 @@ public class Board {
 	 * !!!Miss one if sentence
 	 */
 	public void init() {
-		for(int i = 0; i < width; i++) {
-			for(int j = 0; j < height; j++) {
-				patches[i][j] = new Patch();
-			}
-		}
+		double[][] maxGrainVals = new double[height][width];
+		double[][] iniGrains = new double[height][width];
 		
 		for(int i = 0; i < width; i++) {
 			for(int j = 0; j < height; j++) {
-				patches[i][j].setX(i);
-				patches[i][j].setY(j);
 				if(random.nextDouble() < percentBestLand) {
-					patches[i][j].setMaxGrain(Params.MAX_GRAIN);
-					patches[i][j].setGrain(Params.MAX_GRAIN);
+					maxGrainVals[i][j] = Params.MAX_GRAIN;
+					iniGrains[i][j] = Params.MAX_GRAIN;
 				}
 				else {
-					patches[i][j].setMaxGrain(0);
-					patches[i][j].setGrain(0);
+					maxGrainVals[i][j] = 0;
+					iniGrains[i][j] = 0;
 				}
 			}
 		}
@@ -94,9 +99,9 @@ public class Board {
 		for(int n = 0; n < 5; n++) {
 			for(int i = 0; i < width; i++) {
 				for(int j = 0; j < height; j++) {
-					if (patches[i][j].getMaxGrain() != 0) {
-                        patches[i][j].setGrain(patches[i][j].getMaxGrain());
-                        diffuse(i, j, 0.25);
+					if (maxGrainVals[i][j] != 0) {
+						iniGrains[i][j] = maxGrainVals[i][j];
+                        diffuse(iniGrains, i, j, 0.25);
                     }
 				}
 			}
@@ -105,55 +110,43 @@ public class Board {
 		for(int n = 0; n < 10; n++) {
 			for(int i = 0; i < width; i++) {
 				for(int j = 0; j < height; j++) {
-					diffuse(i, j, 0.25);
+					diffuse(iniGrains, i, j, 0.25);
 				}
 			}
-		}/*for(int i = 0; i < width; i++) {
-			//for(int j = 0; j < height; j++) {
-			System.out.println("Track Patche" );
-			System.out.println("	MaxGrains: " + patches[i][0].getMaxGrain());
-		}//}*/
+		}
+		for(int i = 0; i < width; i++) {
+			for(int j = 0; j < height; j++) {
+				int grainHere = (int) iniGrains[i][j];
+				patches[i][j] = new Patch(grainHere, grainHere);
+				patches[i][j].setX(i);
+				patches[i][j].setY(j);
+			}
+		}
 	}
 	
 	/** 
 	 * Diffuse the board
 	 * Created corresponding to NetLogo Model
 	 */
-	private void diffuse(int x, int y, double d) {
+	private void diffuse(double[][] iniGrains, int x, int y, double d) {
 		
+		// define adjacent patches' coordinate
 		int x_prev = x - 1 < 0 ? 49 : x - 1;
         int x_next = x + 1 > 49 ? 0 : x + 1;
         int y_prev = y - 1 < 0 ? 49 : y - 1;
         int y_next = y + 1 > 49 ? 0 : y + 1;
 		
-		double share = patches[x][y].getGrain() * d / 8;
-		System.out.println(share);
-		patches[x][y].setMaxGrain(patches[x][y].getMaxGrain() - (int)(patches[x][y].getGrain() * d));
-		patches[x][y].init();
-		
-		patches[x_next][y].setMaxGrain(patches[x][y].getMaxGrain() + (int)share);
-		patches[x_next][y].init();
-		
-		patches[x_prev][y].setMaxGrain(patches[x][y].getMaxGrain() + (int)share);
-		patches[x_prev][y].init();
-		
-		patches[x][y_next].setMaxGrain(patches[x][y].getMaxGrain() + (int)share);
-		patches[x][y_next].init();
-		
-		patches[x][y_prev].setMaxGrain(patches[x][y].getMaxGrain() + (int)share);
-		patches[x][y_prev].init();
-		
-		patches[x_next][y_next].setMaxGrain(patches[x][y].getMaxGrain() + (int)share);
-		patches[x_next][y_next].init();
-		
-		patches[x_prev][y_next].setMaxGrain(patches[x][y].getMaxGrain() + (int)share);
-		patches[x_prev][y_next].init();
-		
-		patches[x_next][y_prev].setMaxGrain(patches[x][y].getMaxGrain() + (int)share);
-		patches[x_next][y_prev].init();
-		
-		patches[x_prev][y_prev].setMaxGrain(patches[x][y].getMaxGrain() + (int)share);
-		patches[x_prev][y_prev].init();
+        // diffuse grains to adjacent patches
+		double share = iniGrains[x][y] * d / 8;
+		iniGrains[x][y] -= iniGrains[x][y] * d;
+		iniGrains[x_next][y] += share;
+		iniGrains[x_prev][y] += share;
+		iniGrains[x][y_next] += share;
+		iniGrains[x][y_prev] += share;
+		iniGrains[x_next][y_next] += share;
+		iniGrains[x_prev][y_next] += share;
+		iniGrains[x_next][y_prev] += share;
+		iniGrains[x_prev][y_prev] += share;
 	}
 	
 	/** 
@@ -245,26 +238,6 @@ public class Board {
 	public void tick() {
 		setDirections();
 		
-		/*for(int n = 0; n <10;n++) {
-			System.out.println("Track Patche" + n);
-			System.out.println("	Grains: " + patches[n][0].getGrain());
-			System.out.println("	MaxGrains: " + patches[n][0].getMaxGrain());
-		}*/
-		
-		/*System.out.println("Track Turtle1:");
-		System.out.println("	Turtle1's wealth: " + turtles[1].getWealth());
-		System.out.println("	Turtle1's age: " + turtles[1].getAge());
-		System.out.println("	Turtle1's metabolism: " + turtles[1].getMetabolism());
-		System.out.println("	Turtle1's vision: " + turtles[1].getVision());
-		System.out.println("	Turtle1's direction: " + turtles[1].getDirection());
-		System.out.println("	Turtle1's x: " + turtles[1].getX());
-		System.out.println("	Turtle1's y: " + turtles[1].getY());*/
-		
-		// Count criterion for classes
-		// if a turtle has less than a third
-		// the wealth of the richest turtle, it is lower class.  
-		// If between one and two thirds, it is medium class.  
-		// If over two thirds, it is higher class.
 		lowest_wealth = turtles[0].getWealth();
 		highest_wealth = turtles[0].getWealth();
 		for(int n = 1; n < numPeople; n++) {
@@ -285,6 +258,9 @@ public class Board {
 		else {
 			tick_count++;
 		}
+		
+		// get Gini index relative params
+		relativeParams();
 	}
 
 	/** 
@@ -410,12 +386,115 @@ public class Board {
 		}
 	}
 	
-	public int getHighestWealth() {
-		return highest_wealth;
+	/**
+     * Count all params relative to gini index calculating
+     */
+	public void relativeParams() {
+		double lower_sum = 0;
+		double medium_sum = 0;
+		double higher_sum = 0;
+		
+		double temp_wealth = 0.0;
+		double current_income = 0;
+		double prev_income = 0;
+		double current_income_percent = 0.0;
+		double prev_income_percent = 0.0;
+		double current_population_percent = 0.0;
+		double prev_population_percent = 0.0;
+		double actual_area = 0.0;
+		
+		double[] wealth_array = new double[numPeople];
+		for(int n = 0; n < numPeople; n++) {
+			if(turtles[n].getWealth() >= medium_higher) {
+				higher_num++;
+				temp_wealth = turtles[n].getWealth();
+				higher_sum += temp_wealth;
+			}
+			if(turtles[n].getWealth() < lower_medium) {
+				lower_num++;
+				temp_wealth = turtles[n].getWealth();
+				lower_sum += temp_wealth;
+			}
+			if(turtles[n].getWealth() >= lower_medium && turtles[n].getWealth() < medium_higher) {
+				medium_num++;
+				temp_wealth = turtles[n].getWealth();
+				medium_sum += temp_wealth;
+			}
+			wealth_array[n] = turtles[n].getWealth();
+		}
+		lower_avg = lower_sum / lower_num / Params.ADJUSTMENT_COEFFICIENT;
+		medium_avg = medium_sum / medium_num / Params.ADJUSTMENT_COEFFICIENT;
+		higher_avg = higher_sum / higher_num / Params.ADJUSTMENT_COEFFICIENT;
+		adjust_highest_wealth = (int)(highest_wealth /  Params.ADJUSTMENT_COEFFICIENT);
+		adjust_lowest_wealth = lowest_wealth;
+		
+		// count Gini index
+		Arrays.sort(wealth_array);
+		double total_sum = lower_sum + medium_sum + higher_sum;
+		double precise_numPeople = numPeople;
+		for(int n = 1; n < numPeople; n++) {
+			
+			prev_income += wealth_array[n-1];
+			prev_income_percent = prev_income / total_sum;
+			prev_population_percent = n / precise_numPeople;
+			
+			current_income = prev_income + wealth_array[n];
+			current_income_percent = current_income / total_sum;
+			current_population_percent = (n + 1) / precise_numPeople;
+			
+			actual_area += (current_population_percent - prev_population_percent) * (prev_income_percent + (1 / 2) * (current_income_percent - prev_income_percent));
+		}
+		gini_index = (0.5 - actual_area) / 0.5;
 	}
 	
-	public int getLowestWealth() {
-		return lowest_wealth;
+	/**
+     * Recover all params relative to gini index calculating
+     */
+	public void recover() {
+		lower_avg = 0.0;
+		medium_avg = 0.0;
+		higher_avg = 0.0;
+		lower_num = 0;
+		medium_num = 0;
+		higher_num = 0;
+		gini_index = 0.0;
 	}
+	
+	public int getLowerNum() {
+		return lower_num;
+	}
+	
+	public int getMediumNum() {
+		return medium_num;
+	}
+	
+	public int getHigherNum() {
+		return higher_num;
+	}
+	
+	public double getLowerAvg() {
+		return lower_avg;
+	}
+	
+	public double getMediumAvg() {
+		return medium_avg;
+	}
+	
+	public double getHigherAvg() {
+		return higher_avg;
+	}
+	
+	public double getGiniIndex() {
+		return gini_index;
+	}
+	
+	public int getAdjustHighestWealth() {
+		return adjust_highest_wealth;
+	}
+
+	public int getAdjustLowestWealth() {
+		return adjust_lowest_wealth;
+	}
+	
 	
 }

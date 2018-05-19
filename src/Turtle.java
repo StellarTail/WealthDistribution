@@ -52,7 +52,7 @@ public class Turtle {
     	int random_wealth = lowest_wealth + random.nextInt(highest_wealth - lowest_wealth);
     	vision = 1 + random.nextInt(maxVision);
     	metabolism = 1 + random.nextInt(maxMetabolism);
-    	wealth = metabolism + random_wealth + inheritage;
+    	wealth = (int)(metabolism + random_wealth + inheritage * Params.WEALTH_INHERITANCE);
     	age = 0;
     	maxAge = minLife + random.nextInt(maxLife - minLife);
     	this.x = x;
@@ -64,14 +64,16 @@ public class Turtle {
 	 * Only be called when this turtle is alive
 	 */
     public int tick(int grains) {
+    	if(grains <= 0){
+    		age++;
+    		wealth = wealth - metabolism;
+    		return 0;
+    	}
     	int meal = random.nextInt(grains);
     	age++;
     	wealth += meal;
     	wealth = wealth - metabolism;
     	int reservation = grains - meal;
-    	if(reservation < 0) {
-    		return 0;
-    	}
     	return reservation;
     }
     
@@ -80,6 +82,11 @@ public class Turtle {
 	 * Only be called when this turtle is alive
 	 */
     public int tick(int grains, int status) {
+    	if(grains <= 0){
+    		age++;
+    		wealth = wealth - metabolism;
+    		return 0;
+    	}
     	int meal = random.nextInt(grains);
     	int meal_with_tax = 0;
     	switch(status) {
@@ -92,9 +99,6 @@ public class Turtle {
     	wealth += meal_with_tax;
     	wealth = wealth - metabolism;
     	int reservation = grains - meal;
-    	if(reservation < 0) {
-    		return 0;
-    	}
     	return reservation;
     }
     
