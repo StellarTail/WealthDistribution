@@ -55,19 +55,19 @@ public class Params {
     public static final int HIGHER_CLASS = 0;
     
     // tax for higher class
-    public static final double TAX_HIGHER_CLASS = 0.5;
+    public static final double TAX_HIGHER_CLASS = 0.7;
     
     // medium class
     public static final int MEDIUM_CLASS = 1;
     
     // tax for medium class
-    public static final double TAX_MEDIUM_CLASS = 0.2;
+    public static final double TAX_MEDIUM_CLASS = 0.3;
     
     // lower class
     public static final int LOWER_CLASS = 2;
     
     // tax for lower class
-    public static final double TAX_LOWER_CLASS = 0.0;
+    public static final double TAX_LOWER_CLASS = 0.1;
     
     // adjustment coefficient
     public static final double ADJUSTMENT_COEFFICIENT = 3.0;
