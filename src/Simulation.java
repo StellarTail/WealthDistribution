@@ -177,7 +177,7 @@ public class Simulation {
     	double percentBestLand = Double.parseDouble(args[5]);
     	int growthInterval = Integer.parseInt(args[6]);
     	int grainGrow = Integer.parseInt(args[7]);
-    	int ticks = 100;
+    	int ticks = 200;
     	simulation.run(numPeople, maxVision , maxMetabolism, minLife, maxLife, percentBestLand, growthInterval, grainGrow, ticks);
     	System.out.println("Congratulations");
     }
